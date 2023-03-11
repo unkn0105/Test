@@ -1,28 +1,50 @@
-let ball = {
-    x: 300,
-    y: 200,
-    xspeed: 4,
-    yspeed: -3
-}
+let mobilenet;
+let bird;
+let speech;
+let button;
+let classifyResult;
 
+
+function preload() {
+  mobilenet = ml5.imageClassifier('MobileNet', modelReady);
+}
 
 function setup() {
-    createCanvas(600, 400);
-}
-
-function draw() {
+    createCanvas(640, 480);
+    bird = createImg('bird.jpg', imageReady);
+    bird.hide();
     background(0);
-    stroke(255);
-    strokeWeight(4);
-    noFill();
-    ellipse(ball.x, ball.y, 24, 24);
-
-    if (ball.x > width || ball.x < 0) {
-        ball.xspeed = ball.xspeed * (-1);
-    }
-    if (ball.y > height || ball.y < 0) {
-        ball.yspeed = ball.yspeed * (-1);
-    }
-    ball.x = ball.x + ball.xspeed;
-    ball.y = ball.y + ball.yspeed;
+    speech = new p5.Speech();
+    button = createButton('click to calssify');
+    button.position(700,500);
+    button.mousePressed(modelReady);    
 }
+
+function modelReady() {
+    console.log('Model is ready!');
+    mobilenet.classify(bird, gotResults);    
+}
+
+function gotResults(error, results) { 
+    if (error) {
+        console.log(error);
+    } else {
+        console.log(results);
+        let label = results[0].label;
+        let confidence = results[0].confidence;
+        let p1 = createP(label);
+        let p2 =createP(confidence);
+        p1.style('font-size','25px');
+        p1.position(10,550);
+        p2.style('font-size','25px');
+        p2.position (10,600); 
+        speech.setLang('sk-SK');
+        speech.speak(`This would be ${label}`);
+    }
+}
+
+function imageReady() {
+    console.log('image is ready!');
+    image(bird, 0, 0, width, height); 
+}
+
